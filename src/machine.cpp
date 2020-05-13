@@ -107,6 +107,7 @@ int Machine::RUN_FILE(char* file_name, int **KMP, int quantity_q){
     if ((fd = open(file_name, O_RDONLY))<0){
         pthread_mutex_lock(&monitor);
         perror("RUN_FILE: open");
+        fprintf(stderr, "filename: \"%s\"\n", file_name);
         pthread_mutex_unlock(&monitor);
         return -1;
     }
@@ -121,9 +122,10 @@ int Machine::RUN_FILE(char* file_name, int **KMP, int quantity_q){
     for (; str!=seof; ++str){
         q = KMP[q][(int)(unsigned char)*str];
         if (q == quantity_q - 1){
+            char* str_save = str;
             for (;*str!='\n' && str!=seof; ++str);++str;
             pthread_mutex_lock(&monitor);
-            printf("%s :  string number %d:\n", file_name, p);
+            printf("%s :  string number %d, end symbol number %ld:\n", file_name, p, str_save - (char *) mem);
             write(1, (void*)out_string, str-out_string);
             pthread_mutex_unlock(&monitor);
             munmap((void*)str, size);
